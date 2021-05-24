@@ -83,4 +83,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void onResult(String title, String message, int image){
+        
+    }
 }
