@@ -13,7 +13,7 @@ public class MainActivity extends AppCompatActivity {
     TextView countDownTV, remainingTapsTV, statusOfGameTV;
     Button tapTapButton;
     CountDownTimer mCountDownTimer;
-    int remainingTaps = 10;
+    int remainingTaps = 350;
     int remainingTime = 60;
 
     @Override
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         tapTapButton = findViewById(R.id.tapTapBtn);
 
         tapTapButton.setOnClickListener(v -> {
-            if(remainingTaps == 10){
+            if(remainingTaps == 350){
                 mCountDownTimer.start();
             }
 
