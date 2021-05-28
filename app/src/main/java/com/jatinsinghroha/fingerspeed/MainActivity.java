@@ -3,44 +3,48 @@ package com.jatinsinghroha.fingerspeed;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
+import android.widget.Toast;
+
+import com.jatinsinghroha.fingerspeed.databinding.ActivityMainBinding;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView countDownTV, remainingTapsTV, statusOfGameTV;
-    Button tapTapButton;
+    ActivityMainBinding bind;
+
     CountDownTimer mCountDownTimer;
     int remainingTaps = 350;
     int remainingTime = 60;
+    private boolean gameOver = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        bind = ActivityMainBinding.inflate(getLayoutInflater());
+        View view = bind.getRoot();
+        setContentView(view);
 
-        countDownTV = findViewById(R.id.countDownTV);
-        remainingTapsTV = findViewById(R.id.remainingTapsTV);
-        statusOfGameTV = findViewById(R.id.statusOfGameTV);
-        tapTapButton = findViewById(R.id.tapTapBtn);
+        bind.playPauseButton.setOnClickListener(v -> {
+            managePlayPause();
+        });
 
-        tapTapButton.setOnClickListener(v -> {
+        bind.tapTapBtn.setOnClickListener(v -> {
             if(remainingTaps == 350){
+                bind.playPauseButton.setChecked(true);
                 mCountDownTimer.start();
             }
 
             remainingTaps--;
 
-            remainingTapsTV.setText(String.valueOf(remainingTaps));
+            bind.remainingTapsTV.setText(String.valueOf(remainingTaps));
 
             if(remainingTaps == 0){
                 mCountDownTimer.cancel();
                 mCountDownTimer = null;
-                tapTapButton.setEnabled(false);
-                statusOfGameTV.setVisibility(View.VISIBLE);
-                statusOfGameTV.setText("Congratulations, You have won.");
+                bind.tapTapBtn.setEnabled(false);
+                bind.statusOfGameTV.setVisibility(View.VISIBLE);
+                bind.statusOfGameTV.setText("Congratulations, You have won.");
             }
         });
     }
@@ -50,16 +54,24 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTick(long millisUntilFinished) {
                 remainingTime --;
-                countDownTV.setText(String.valueOf(remainingTime));
-                statusOfGameTV.setVisibility(View.INVISIBLE);
+                bind.countDownTV.setText(String.valueOf(remainingTime));
             }
 
             @Override
             public void onFinish() {
-                tapTapButton.setEnabled(false);
-                statusOfGameTV.setVisibility(View.VISIBLE);
+                cancel();
+                bind.tapTapBtn.setEnabled(false);
+                bind.statusOfGameTV.setVisibility(View.VISIBLE);
                 String text = "You have lost the game, try again";
-                statusOfGameTV.setText(text);
+                bind.statusOfGameTV.setText(text);
+
+                bind.playPauseButton.setChecked(false);
+                bind.playPauseButton.setTextOff("PLAY AGAIN");
+
+                remainingTime = 60;
+                remainingTaps = 350;
+                gameOver = true;
+                managePlayPause();
             }
         };
     }
@@ -85,6 +97,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onResult(String title, String message, int image){
-        
+        /**
+         * implement dialog box for win/loss with 2/3 action buttons.
+          */
+    }
+
+    private void managePlayPause(){
+        if(mCountDownTimer!=null && remainingTime != 60){
+            bind.playPauseButton.setTextOff("Resume the game");
+            bind.playPauseButton.setChecked(false);
+            mCountDownTimer.cancel();
+            mCountDownTimer = null;
+        }
+        else if(mCountDownTimer == null){
+            bind.tapTapBtn.setEnabled(true);
+            gameOver = false;
+            mCountDownTimer = getCountDownTimer(remainingTime);
+            mCountDownTimer.start();
+            bind.playPauseButton.setChecked(true);
+        }
+        else if(gameOver){
+            bind.playPauseButton.setTextOff("RETRY - PLAY AGAIN");
+            bind.playPauseButton.setChecked(false);
+            mCountDownTimer = null;
+        }
+        else{
+            bind.playPauseButton.setChecked(true);
+            mCountDownTimer.start();
+            Toast.makeText(MainActivity.this, "Game has started.", Toast.LENGTH_SHORT);
+        }
     }
 }
